@@ -94,8 +94,15 @@ export const getCustomOpenaiApiUrl = () =>
 export const getCustomOpenaiModelName = () =>
   loadConfig().MODELS.CUSTOM_OPENAI.MODEL_NAME;
 
-export const getLMStudioApiEndpoint = () =>
-  loadConfig().MODELS.LM_STUDIO.API_URL;
+export const getLMStudioApiEndpoint = () => {
+  try {
+    const config = loadConfig();
+    return config?.MODELS?.LM_STUDIO?.API_URL || '';
+  } catch (error) {
+    console.error('Error loading LM Studio API endpoint:', error);
+    return '';
+  }
+};
 
 const mergeConfigs = (current: any, update: any): any => {
   if (update === null || update === undefined) {
