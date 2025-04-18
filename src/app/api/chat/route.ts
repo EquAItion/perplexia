@@ -114,17 +114,22 @@ const handleEmitterEvents = async (
       })
       .execute();
   });
-  stream.on('error', (data) => {
-    const parsedData = JSON.parse(data);
-    writer.write(
-      encoder.encode(
-        JSON.stringify({
-          type: 'error',
-          data: parsedData.data,
-        }),
-      ),
-    );
-    writer.close();
+  stream.on('error', async (data) => {
+    try {
+      const parsedData = JSON.parse(data);
+      await writer.write(
+        encoder.encode(
+          JSON.stringify({
+            type: 'error',
+            data: parsedData.data,
+          }),
+        ),
+      );
+      await writer.close();
+    } catch (err) {
+      // Stream might already be closed
+      console.error('Error handling stream error:', err);
+    }
   });
 };
 
