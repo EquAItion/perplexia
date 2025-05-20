@@ -27,3 +27,4 @@ API_KEY = "sk-8202f5aeb5ae4ba686bdf07d54d6dec5"
 
 [API_ENDPOINTS]
 SEARXNG = "https://searxng-519248176769.asia-south1.run.app"
+
