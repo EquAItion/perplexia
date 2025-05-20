@@ -187,133 +187,8 @@ const handleHistorySave = async (
   }
 };
 
-export const POST = async (req: Request) => {
-  try {
-    const body = (await req.json()) as Body;
-    const { message } = body;
-
-    if (message.content === '') {
-      return Response.json(
-        {
-          message: 'Please provide a message to process',
-        },
-        { status: 400 },
-      );
-    }
-
-    const [chatModelProviders, embeddingModelProviders] = await Promise.all([
-      getAvailableChatModelProviders(),
-      getAvailableEmbeddingModelProviders(),
-    ]);
-
-    const chatModelProvider =
-      chatModelProviders[
-        body.chatModel?.provider || Object.keys(chatModelProviders)[0]
-      ];
-    const chatModel =
-      chatModelProvider[
-        body.chatModel?.name || Object.keys(chatModelProvider)[0]
-      ];
-
-    const embeddingProvider =
-      embeddingModelProviders[
-        body.embeddingModel?.provider || Object.keys(embeddingModelProviders)[0]
-      ];
-    const embeddingModel =
-      embeddingProvider[
-        body.embeddingModel?.name || Object.keys(embeddingProvider)[0]
-      ];
-
-    let llm: BaseChatModel | undefined;
-    let embedding = embeddingModel.model;
-
-    if (body.chatModel?.provider === 'custom_openai') {
-      llm = new ChatOpenAI({
-        openAIApiKey: getCustomOpenaiApiKey(),
-        modelName: getCustomOpenaiModelName(),
-        temperature: 0.7,
-        configuration: {
-          baseURL: getCustomOpenaiApiUrl(),
-        },
-      }) as unknown as BaseChatModel;
-    } else if (chatModelProvider && chatModel) {
-      llm = chatModel.model;
-    }
-
-    if (!llm) {
-      return Response.json({ error: 'Invalid chat model' }, { status: 400 });
-    }
-
-    if (!embedding) {
-      return Response.json(
-        { error: 'Invalid embedding model' },
-        { status: 400 },
-      );
-    }
-
-    const humanMessageId =
-      message.messageId ?? crypto.randomBytes(7).toString('hex');
-    const aiMessageId = crypto.randomBytes(7).toString('hex');
-
-    const history: BaseMessage[] = body.history.map((msg) => {
-      if (msg[0] === 'human') {
-        return new HumanMessage({
-          content: msg[1],
-        });
-      } else {
-        return new AIMessage({
-          content: msg[1],
-        });
-      }
-    });
-
-    const handler = searchHandlers[body.focusMode];
-
-    if (!handler) {
-      return Response.json(
-        {
-          message: 'Invalid focus mode',
-        },
-        { status: 400 },
-      );
-    }
-
-    const stream = await handler.searchAndAnswer(
-      message.content,
-      history,
-      llm,
-      embedding,
-      body.optimizationMode,
-      body.files,
-      body.systemInstructions,
-    );
-
-    const responseStream = new TransformStream();
-    const writer = responseStream.writable.getWriter();
-    const encoder = new TextEncoder();
-
-    handleEmitterEvents(stream, writer, encoder, aiMessageId, message.chatId);
-    handleHistorySave(message, humanMessageId, body.focusMode, body.files);
-
-    return new Response(responseStream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        Connection: 'keep-alive',
-        'Cache-Control': 'no-cache, no-transform',
-      },
-    });
-  } catch (err) {
-    console.error('An error occurred while processing chat request:', err);
-    return Response.json(
-      { message: 'An error occurred while processing chat request' },
-      { status: 500 },
-    );
-  }
-};
-
 export async function POST(req: Request) {
   try {
-    // Add CORS headers
     const headers = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -328,7 +203,7 @@ export async function POST(req: Request) {
         {
           message: 'Please provide a message to process',
         },
-        { status: 400 },
+        { status: 400, headers },
       );
     }
 
@@ -372,13 +247,13 @@ export async function POST(req: Request) {
     }
 
     if (!llm) {
-      return Response.json({ error: 'Invalid chat model' }, { status: 400 });
+      return Response.json({ error: 'Invalid chat model' }, { status: 400, headers });
     }
 
     if (!embedding) {
       return Response.json(
         { error: 'Invalid embedding model' },
-        { status: 400 },
+        { status: 400, headers },
       );
     }
 
@@ -405,7 +280,7 @@ export async function POST(req: Request) {
         {
           message: 'Invalid focus mode',
         },
-        { status: 400 },
+        { status: 400, headers },
       );
     }
 
@@ -431,6 +306,7 @@ export async function POST(req: Request) {
         'Content-Type': 'text/event-stream',
         Connection: 'keep-alive',
         'Cache-Control': 'no-cache, no-transform',
+        ...headers,
       },
     });
   } catch (err) {
@@ -440,4 +316,4 @@ export async function POST(req: Request) {
       { status: 500 },
     );
   }
-};
+}

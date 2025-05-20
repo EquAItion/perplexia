@@ -6,13 +6,13 @@ KEEP_ALIVE = "5m"
 API_KEY = ""
 
 [MODELS.GROQ]
-API_KEY = ""
+API_KEY = "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"
 
 [MODELS.ANTHROPIC]
 API_KEY = ""
 
 [MODELS.GEMINI]
-API_KEY = "AIzaSyC6NCuoItsu-rQPVCPUp99RJpC7gVKFnXw"
+API_KEY = ""
 
 [MODELS.CUSTOM_OPENAI]
 API_KEY = ""
@@ -27,4 +27,3 @@ API_KEY = "sk-8202f5aeb5ae4ba686bdf07d54d6dec5"
 
 [API_ENDPOINTS]
 SEARXNG = "https://searxng-519248176769.asia-south1.run.app"
-
