@@ -187,15 +187,33 @@ const handleHistorySave = async (
   }
 };
 
-export async function POST(req: Request) {
-  try {
-    const origin = req.headers.get('origin') || '*';
-    const headers = {
+export async function OPTIONS(req: Request) {
+  const origin = req.headers.get('origin') || '*';
+  return new Response(null, {
+    status: 204,
+    headers: {
       'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Credentials': 'true'
-    };
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
+
+const getResponseHeaders = (origin: string) => ({
+  'Access-Control-Allow-Origin': origin,
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true',
+  'Cache-Control': 'no-cache, no-transform',
+  'Connection': 'keep-alive'
+});
+
+export async function POST(req: Request) {
+  try {
+    const origin = req.headers.get('origin') || '*';
+    const headers = getResponseHeaders(origin);
 
     const body = (await req.json()) as Body;
     const { message } = body;
@@ -306,8 +324,6 @@ export async function POST(req: Request) {
     return new Response(responseStream.readable, {
       headers: {
         'Content-Type': 'text/event-stream',
-        Connection: 'keep-alive',
-        'Cache-Control': 'no-cache, no-transform',
         ...headers,
       },
     });
@@ -318,12 +334,7 @@ export async function POST(req: Request) {
       { message: 'An error occurred while processing chat request', error: err instanceof Error ? err.message : 'Unknown error' },
       { 
         status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': origin,
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Allow-Credentials': 'true'
-        }
+        headers: getResponseHeaders(origin)
       },
     );
   }
