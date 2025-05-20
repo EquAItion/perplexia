@@ -189,10 +189,12 @@ const handleHistorySave = async (
 
 export async function POST(req: Request) {
   try {
+    const origin = req.headers.get('origin') || '*';
     const headers = {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': origin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Credentials': 'true'
     };
 
     const body = (await req.json()) as Body;
@@ -311,9 +313,18 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     console.error('An error occurred while processing chat request:', err);
+    const origin = req.headers.get('origin') || '*';
     return Response.json(
-      { message: 'An error occurred while processing chat request' },
-      { status: 500 },
+      { message: 'An error occurred while processing chat request', error: err instanceof Error ? err.message : 'Unknown error' },
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': origin,
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Access-Control-Allow-Credentials': 'true'
+        }
+      },
     );
   }
 }
