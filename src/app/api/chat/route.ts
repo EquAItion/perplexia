@@ -213,7 +213,10 @@ const getResponseHeaders = (origin: string) => ({
 export async function POST(req: Request) {
   try {
     const origin = req.headers.get('origin') || '*';
-    const headers = getResponseHeaders(origin);
+    const headers = {
+      ...getResponseHeaders(origin),
+      'Content-Type': 'text/event-stream'
+    };
 
     const body = (await req.json()) as Body;
     const { message } = body;
@@ -223,7 +226,7 @@ export async function POST(req: Request) {
         {
           message: 'Please provide a message to process',
         },
-        { status: 400, headers },
+        { status: 400, headers: getResponseHeaders(origin) },
       );
     }
 
@@ -321,12 +324,7 @@ export async function POST(req: Request) {
     handleEmitterEvents(stream, writer, encoder, aiMessageId, message.chatId);
     handleHistorySave(message, humanMessageId, body.focusMode, body.files);
 
-    return new Response(responseStream.readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        ...headers,
-      },
-    });
+    return new Response(responseStream.readable, { headers });
   } catch (err) {
     console.error('An error occurred while processing chat request:', err);
     const origin = req.headers.get('origin') || '*';
