@@ -212,17 +212,7 @@ const getResponseHeaders = (origin: string) => ({
 
 export async function POST(req: Request) {
   try {
-    // Ensure database is initialized
-    if (!db) {
-      const origin = req.headers.get('origin') || '*';
-      return Response.json(
-        { message: 'Database initialization in progress. Please try again in a few seconds.' },
-        { 
-          status: 503,
-          headers: getResponseHeaders(origin)
-        }
-      );
-    }
+
     const origin = req.headers.get('origin') || '*';
     const headers = {
       ...getResponseHeaders(origin),
@@ -336,31 +326,15 @@ export async function POST(req: Request) {
     handleHistorySave(message, humanMessageId, body.focusMode, body.files);
 
     return new Response(responseStream.readable, { headers });
-  } catch (err: any) {
+  } catch (err) {
     console.error('An error occurred while processing chat request:', err);
     const origin = req.headers.get('origin') || '*';
-    
-    // Handle database-specific errors
-    if (err?.message?.includes('database')) {
-      return Response.json(
-        { message: 'Database error. Please try again later.' },
-        { 
-          status: 503,
-          headers: getResponseHeaders(origin)
-        }
-      );
-    }
-
-    // Handle other errors
     return Response.json(
-      { 
-        message: 'An error occurred while processing chat request',
-        error: process.env.NODE_ENV === 'development' ? err?.message : 'Unknown error'
-      },
+      { message: 'An error occurred while processing chat request', error: err instanceof Error ? err.message : 'Unknown error' },
       { 
         status: 500,
         headers: getResponseHeaders(origin)
-      }
+      },
     );
   }
 }
