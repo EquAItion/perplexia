@@ -212,8 +212,24 @@ const getResponseHeaders = (origin: string) => ({
 
 export async function POST(req: Request) {
   try {
-
     const origin = req.headers.get('origin') || '*';
+
+    // For in-memory database in production, initialize if needed
+    if (process.env.NODE_ENV === 'production') {
+      try {
+        // Test database connection
+        await db.query.chats.findFirst();
+      } catch (dbError) {
+        console.error('Database connection error:', dbError);
+        return Response.json(
+          { message: 'Database connection error. Please try again.' },
+          { 
+            status: 503,
+            headers: getResponseHeaders(origin)
+          }
+        );
+      }
+    }
     const headers = {
       ...getResponseHeaders(origin),
       'Content-Type': 'text/event-stream'
