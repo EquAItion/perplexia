@@ -18,7 +18,7 @@ export type Message = {
   chatId: string;
   createdAt: Date;
   content: string;
-  role: 'user' | 'assistant';
+  type: 'user' | 'assistant';
   suggestions?: string[];
   sources?: Document[];
 };
@@ -214,7 +214,7 @@ const loadMessages = async (
   setMessages(messages);
 
   const history = messages.map((msg) => {
-    return [msg.role, msg.content];
+    return [msg.type, msg.content];
   }) as [string, string][];
 
   console.debug(new Date(), 'app:messages_loaded');
@@ -349,7 +349,7 @@ const ChatWindow = ({ id }: { id?: string }) => {
         content: message,
         messageId: messageId,
         chatId: chatId!,
-        role: 'user',
+        type: 'user',
         createdAt: new Date(),
       },
     ]);
@@ -370,7 +370,7 @@ const ChatWindow = ({ id }: { id?: string }) => {
               content: '',
               messageId: data.messageId,
               chatId: chatId!,
-              role: 'assistant',
+              type: 'assistant',
               sources: sources,
               createdAt: new Date(),
             },
@@ -388,7 +388,7 @@ const ChatWindow = ({ id }: { id?: string }) => {
               content: data.data,
               messageId: data.messageId,
               chatId: chatId!,
-              role: 'assistant',
+              type: 'assistant',
               sources: sources,
               createdAt: new Date(),
             },
@@ -437,7 +437,7 @@ const ChatWindow = ({ id }: { id?: string }) => {
         }
 
         if (
-          lastMsg.role === 'assistant' &&
+          lastMsg.type=== 'assistant' &&
           lastMsg.sources &&
           lastMsg.sources.length > 0 &&
           !lastMsg.suggestions

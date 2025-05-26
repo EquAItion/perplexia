@@ -1,15 +1,18 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from './schema';
 
-// Use in-memory database for production environments
-const sqlite = new Database(process.env.NODE_ENV === 'production' ? ':memory:' : 'data/db.sqlite');
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is not set');
+}
 
-// Enable WAL mode for better concurrency
-sqlite.pragma('journal_mode = WAL');
-
-const db = drizzle(sqlite, {
-  schema: schema,
+// Create postgres client
+const client = postgres(process.env.DATABASE_URL, {
+  max: 1,
+  idle_timeout: 20,
+  connect_timeout: 10,
 });
+
+const db = drizzle(client, { schema });
 
 export default db;

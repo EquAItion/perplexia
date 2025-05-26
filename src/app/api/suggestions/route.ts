@@ -25,9 +25,9 @@ export const POST = async (req: Request) => {
 
     const chatHistory = body.chatHistory
       .map((msg: any) => {
-        if (msg.role === 'user') {
+        if (msg.type === 'user') {
           return new HumanMessage(msg.content);
-        } else if (msg.role === 'assistant') {
+        } else if (msg.type === 'assistant') {
           return new AIMessage(msg.content);
         }
       })

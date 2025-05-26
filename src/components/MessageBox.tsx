@@ -52,7 +52,7 @@ const MessageBox = ({
     const regex = /\[(\d+)\]/g;
     let processedMessage = message.content;
 
-    if (message.role === 'assistant' && message.content.includes('<think>')) {
+    if (message.type === 'assistant' && message.content.includes('<think>')) {
       const openThinkTag = processedMessage.match(/<think>/g)?.length || 0;
       const closeThinkTag = processedMessage.match(/<\/think>/g)?.length || 0;
 
@@ -62,7 +62,7 @@ const MessageBox = ({
     }
 
     if (
-      message.role === 'assistant' &&
+      message.type === 'assistant' &&
       message?.sources &&
       message.sources.length > 0
     ) {
@@ -103,7 +103,7 @@ const MessageBox = ({
 
     setSpeechMessage(message.content.replace(regex, ''));
     setParsedMessage(processedMessage);
-  }, [message.content, message.sources, message.role]);
+  }, [message.content, message.sources, message.type]);
 
   const { speechStatus, start, stop } = useSpeech({ text: speechMessage });
 
@@ -117,7 +117,7 @@ const MessageBox = ({
 
   return (
     <div>
-      {message.role === 'user' && (
+      {message.type === 'user' && (
         <div
           className={cn(
             'w-full',
@@ -131,7 +131,7 @@ const MessageBox = ({
         </div>
       )}
 
-      {message.role === 'assistant' && (
+      {message.type === 'assistant' && (
         <div className="flex flex-col space-y-9 lg:space-y-0 lg:flex-row lg:justify-between lg:space-x-9">
           <div
             ref={dividerRef}
@@ -203,7 +203,7 @@ const MessageBox = ({
               {isLast &&
                 message.suggestions &&
                 message.suggestions.length > 0 &&
-                message.role === 'assistant' &&
+                message.type === 'assistant' &&
                 !loading && (
                   <>
                     <div className="h-px w-full bg-light-secondary dark:bg-dark-secondary" />
