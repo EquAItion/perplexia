@@ -34,6 +34,7 @@ export async function POST(req: Request) {
     const embedding_model_provider = formData.get('embedding_model_provider');
 
     if (!embedding_model || !embedding_model_provider) {
+      console.error('Missing embedding model or provider in request');
       return NextResponse.json(
         { message: 'Missing embedding model or provider' },
         { status: 400 },
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
     let embeddingsModel =
       embeddingModels[provider as string]?.[embeddingModel as string]?.model;
     if (!embeddingsModel) {
+      console.error('Invalid embedding model selected:', provider, embeddingModel);
       return NextResponse.json(
         { message: 'Invalid embedding model selected' },
         { status: 400 },
@@ -127,7 +129,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
-      { message: 'An error has occurred.' },
+      { message: 'An error has occurred.', error: error instanceof Error ? error.message : String(error) },
       { status: 500 },
     );
   }

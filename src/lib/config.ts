@@ -56,9 +56,14 @@ type RecursivePartial<T> = {
 const loadConfig = () => {
   // Server-side only
   if (typeof window === 'undefined') {
-    return toml.parse(
-      fs.readFileSync(path.join(process.cwd(), `${configFileName}`), 'utf-8'),
-    ) as any as Config;
+    try {
+      return toml.parse(
+        fs.readFileSync(path.join(process.cwd(), `${configFileName}`), 'utf-8'),
+      ) as any as Config;
+    } catch (error) {
+      console.error(`Error loading config.toml: ${error}`);
+      throw new Error('Failed to load config.toml. Please ensure the file exists and is accessible.');
+    }
   }
 
   // Client-side fallback - settings will be loaded via API
