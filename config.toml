@@ -1,0 +1,32 @@
+[GENERAL]
+SIMILARITY_MEASURE = "cosine" # "cosine" or "dot"
+KEEP_ALIVE = "5m" # How long to keep Ollama models loaded into memory. (Instead of using -1 use "-1m")
+
+[MODELS.OPENAI]
+API_KEY = ""
+
+[MODELS.GROQ]
+API_KEY = ""
+
+[MODELS.ANTHROPIC]
+API_KEY = ""
+
+[MODELS.GEMINI]
+API_KEY = "AIzaSyA6kq1lGDUU3KF4itoF-5QBZijmH-sp_ck"
+
+[MODELS.CUSTOM_OPENAI]
+API_KEY = ""
+API_URL = ""
+MODEL_NAME = ""
+
+[MODELS.OLLAMA]
+API_URL = "" # Ollama API URL - http://host.docker.internal:11434
+
+[MODELS.DEEPSEEK]
+API_KEY = ""
+
+[MODELS.LM_STUDIO]
+API_URL = "" # LM Studio API URL - http://host.docker.internal:1234
+
+[API_ENDPOINTS]
+SEARXNG = "https://searxng-519248176769.asia-south1.run.app" # SearxNG API URL - http://localhost:32768

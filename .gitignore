@@ -21,7 +21,7 @@ dist/
 .env.production.local
 
 # Config files
-config.toml
+
 
 # Log files
 logs/
